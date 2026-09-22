@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="SPACE RUSH - スペースキーを連打してハイスコアを目指す無料Webゲーム">
+<title>SPACE RUSH - Spacebar Clicker</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+body{
+  display:grid;place-items:center;padding:20px;
+  background:radial-gradient(circle at 50% 0%,#263b72 0,#0b1020 45%,#05070d 100%);
+  color:#fff;
+}
+.game{
+  width:min(760px,100%);padding:28px;
+  border:1px solid rgba(255,255,255,.13);border-radius:28px;
+  background:rgba(10,15,30,.86);box-shadow:0 20px 80px rgba(0,0,0,.45);
+  text-align:center;backdrop-filter:blur(12px)
+}
+.logo{font-size:14px;letter-spacing:.35em;color:#9fb6ff;font-weight:800}
+h1{font-size:clamp(38px,8vw,72px);margin:8px 0 2px;letter-spacing:.04em}
+.sub{color:#aab3c8;margin-bottom:22px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{padding:14px;border-radius:16px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08)}
+.label{font-size:12px;color:#9ca8c2}.value{font-size:28px;font-weight:900;margin-top:3px}
+.score{font-size:clamp(70px,15vw,125px);font-weight:950;line-height:1;margin:32px 0 20px;text-shadow:0 0 30px rgba(120,160,255,.25)}
+.bar{height:12px;background:#20283c;border-radius:99px;overflow:hidden;margin-bottom:22px}
+.fill{height:100%;width:100%;background:linear-gradient(90deg,#72a2ff,#b98cff);transition:width .05s linear}
+.space{
+  width:min(580px,100%);height:125px;border:0;border-radius:22px;
+  background:linear-gradient(135deg,#6e9cff,#9a6cff);color:#fff;
+  font-size:clamp(24px,5vw,38px);font-weight:950;letter-spacing:.05em;
+  cursor:pointer;box-shadow:0 12px 35px rgba(91,115,255,.3);
+  user-select:none;-webkit-user-select:none;touch-action:manipulation;
+}
+.space:active{transform:scale(.97)}
+.space:focus-visible{outline:4px solid #fff;outline-offset:4px}
+.controls{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:18px}
+button.small{min-height:46px;padding:10px 18px;border:1px solid rgba(255,255,255,.13);border-radius:12px;background:#171e31;color:#fff;font-weight:800;cursor:pointer}
+button.small:hover{background:#222c45}
+.message{min-height:25px;margin-top:14px;color:#aeb8ce}
+.hint{font-size:12px;color:#727d96;margin-top:18px}
+.flash{animation:flash .12s ease}
+@keyframes flash{50%{transform:scale(1.025)}}
+@media(max-width:500px){
+ .game{padding:20px 14px}.stats{gap:7px}.stat{padding:11px 5px}
+ .value{font-size:22px}.space{height:105px}
+}
+</style>
+</head>
+<body>
+<main class="game" id="game">
+  <div class="logo">ECLIPSE WEB GAME</div>
+  <h1>SPACE RUSH</h1>
+  <div class="sub">10秒間でSPACEを何回押せる？</div>
+
+  <section class="stats" aria-label="ゲーム情報">
+    <div class="stat"><div class="label">CPS</div><div class="value" id="cps">0.0</div></div>
+    <div class="stat"><div class="label">BEST</div><div class="value" id="best">0</div></div>
+    <div class="stat"><div class="label">TIME</div><div class="value" id="time">10.0</div></div>
+  </section>
+
+  <div class="score" id="score">0</div>
+  <div class="bar"><div class="fill" id="fill"></div></div>
+
+  <button class="space" id="space" type="button">SPACE × PRESS</button>
+
+  <div class="message" id="message">ボタンを押すか、SPACEキーでスタート！</div>
+
+  <div class="controls">
+    <button class="small" type="button" data-time="10">10秒</button>
+    <button class="small" type="button" data-time="30">30秒</button>
+    <button class="small" type="button" id="reset">リセット</button>
+  </div>
+
+  <div class="hint">PC：SPACEキー　／　スマホ：ボタンをタップ</div>
+</main>
+
+<script>
+(() => {
+  "use strict";
+
+  const game = document.getElementById("game");
+  const space = document.getElementById("space");
+  const scoreEl = document.getElementById("score");
+  const cpsEl = document.getElementById("cps");
+  const bestEl = document.getElementById("best");
+  const timeEl = document.getElementById("time");
+  const fill = document.getElementById("fill");
+  const message = document.getElementById("message");
+
+  let duration = 10;
+  let score = 0;
+  let running = false;
+  let endTime = 0;
+  let raf = 0;
+  let presses = [];
+
+  let best = Number(localStorage.getItem("spaceRushBest") || 0);
+  if (!Number.isFinite(best) || best < 0) best = 0;
+  bestEl.textContent = best;
+
+  function reset() {
+    running = false;
+    score = 0;
+    presses = [];
+    cancelAnimationFrame(raf);
+    scoreEl.textContent = "0";
+    cpsEl.textContent = "0.0";
+    timeEl.textContent = duration.toFixed(1);
+    fill.style.width = "100%";
+    message.textContent = "ボタンを押すか、SPACEキーでスタート！";
+  }
+
+  function finish() {
+    if (!running) return;
+    running = false;
+    cancelAnimationFrame(raf);
+
+    if (score > best) {
+      best = score;
+      localStorage.setItem("spaceRushBest", String(best));
+      bestEl.textContent = best;
+      message.textContent = `終了！ ${score}回！ NEW BEST！`;
+    } else {
+      message.textContent = `終了！ ${score}回押せました！`;
+    }
+
+    timeEl.textContent = "0.0";
+    fill.style.width = "0%";
+  }
+
+  function start() {
+    if (running) return;
+    running = true;
+    endTime = performance.now() + duration * 1000;
+    message.textContent = "連打開始！";
+    raf = requestAnimationFrame(update);
+  }
+
+  function press() {
+    const now = performance.now();
+
+    if (!running) start();
+    if (!running || now >= endTime) {
+      finish();
+      return;
+    }
+
+    score++;
+    presses.push(now);
+
+    while (presses.length && presses[0] < now - 1000) {
+      presses.shift();
+    }
+
+    scoreEl.textContent = score;
+    cpsEl.textContent = presses.length.toFixed(1);
+
+    space.classList.remove("flash");
+    void space.offsetWidth;
+    space.classList.add("flash");
+  }
+
+  function update(now) {
+    if (!running) return;
+
+    const remaining = Math.max(0, endTime - now);
+
+    while (presses.length && presses[0] < now - 1000) {
+      presses.shift();
+    }
+
+    timeEl.textContent = (remaining / 1000).toFixed(1);
+    cpsEl.textContent = presses.length.toFixed(1);
+    fill.style.width = `${(remaining / (duration * 1000)) * 100}%`;
+
+    if (remaining <= 0) {
+      finish();
+      return;
+    }
+
+    raf = requestAnimationFrame(update);
+  }
+
+  space.addEventListener("click", press);
+
+  game.addEventListener("keydown", (event) => {
+    if (event.code !== "Space") return;
+    event.preventDefault();
+    press();
+  });
+
+  document.querySelectorAll("[data-time]").forEach(button => {
+    button.addEventListener("click", () => {
+      duration = Number(button.dataset.time);
+      if (!Number.isFinite(duration) || duration <= 0) duration = 10;
+      reset();
+    });
+  });
+
+  document.getElementById("reset").addEventListener("click", reset);
+
+  game.tabIndex = 0;
+  game.focus();
+  reset();
+})();
+</script>
+</body>
+</html>
