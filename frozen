@@ -1,0 +1,90 @@
+local lar1 = game:GetService("CoreGui")
+local lar2 = game:GetService("UserInputService")
+local lar3 = Instance.new("ScreenGui")
+lar3.Name = "Freeze Trade ❄️🤝"
+lar3.ResetOnSpawn = false
+lar3.Parent = lar1
+local lar4 = Instance.new("Frame")
+lar4.Size = UDim2.new(0, 300, 0, 200)
+lar4.Position = UDim2.new(0.5, -150, 0.5, -100)
+lar4.BackgroundColor3 = Color3.fromRGB(28, 28, 32)
+lar4.BorderSizePixel = 0
+lar4.Parent = lar3
+local lar5 = Instance.new("UICorner")
+lar5.CornerRadius = UDim.new(0, 16)
+lar5.Parent = lar4
+local lar6 = Instance.new("UIStroke")
+lar6.Thickness = 2
+lar6.Color = Color3.fromRGB(90, 150, 255)
+lar6.Parent = lar4
+local lar7 = Instance.new("UIGradient")
+lar7.Color = ColorSequence.new({
+    [1] = ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 40, 50)),
+    [2] = ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 20, 25))
+})
+lar7.Rotation = 90
+lar7.Parent = lar4
+local lar8 = Instance.new("TextLabel")
+lar8.Size = UDim2.new(1, 0, 0, 40)
+lar8.BackgroundTransparency = 1
+lar8.Text = "❄️ Freeze Trade ❄️ 🤝"
+lar8.Font = Enum.Font.GothamBold
+lar8.TextScaled = true
+lar8.TextColor3 = Color3.new(1, 1, 1)
+lar8.Parent = lar4
+local lar9 = Instance.new("Frame")
+lar9.Size = UDim2.new(0.9, 0, 0, 2)
+lar9.Position = UDim2.new(0.05, 0, 0, 42)
+lar9.BackgroundColor3 = Color3.fromRGB(80, 80, 100)
+lar9.BorderSizePixel = 0
+lar9.Parent = lar4
+local lar10 = Instance.new("TextButton")
+lar10.Size = UDim2.new(0.8, 0, 0, 55)
+lar10.Position = UDim2.new(0.1, 0, 0.4, -10)
+lar10.BackgroundColor3 = Color3.fromRGB(70, 140, 255)
+lar10.Text = "🧊 FREEZE TRADE 🧊"
+lar10.TextScaled = true
+lar10.Font = Enum.Font.GothamBold
+lar10.TextColor3 = Color3.new(1, 1, 1)
+lar10.Parent = lar4
+local lar11 = Instance.new("UICorner")
+lar11.CornerRadius = UDim.new(0, 14)
+lar11.Parent = lar10
+local lar12 = Instance.new("UIStroke")
+lar12.Thickness = 2
+lar12.Color = Color3.fromRGB(120, 180, 255)
+lar12.Parent = lar10
+local lar13 = Instance.new("TextButton")
+lar13.Size = UDim2.new(0.8, 0, 0, 55)
+lar13.Position = UDim2.new(0.1, 0, 0.7, -10)
+lar13.BackgroundColor3 = Color3.fromRGB(80, 200, 120)
+lar13.Text = "⚡ FORCE ACCEPT ⚡"
+lar13.TextScaled = true
+lar13.Font = Enum.Font.GothamBold
+lar13.TextColor3 = Color3.new(1, 1, 1)
+lar13.Parent = lar4
+local lar14 = Instance.new("UICorner")
+lar14.CornerRadius = UDim.new(0, 14)
+lar14.Parent = lar13
+local lar15 = Instance.new("UIStroke")
+lar15.Thickness = 2
+lar15.Color = Color3.fromRGB(120, 255, 170)
+lar15.Parent = lar13
+local lar16 = lar4.InputBegan:Connect(function(input, gameProcessed)
+end)
+local lar17 = lar4.InputChanged:Connect(function(input, gameProcessed)
+end)
+local lar18 = lar2.InputChanged:Connect(function(input, gameProcessed)
+end)
+local lar19 = lar10.MouseEnter:Connect(function(...)
+    lar10.BackgroundColor3 = Color3.fromRGB(90, 160, 255)
+end)
+local lar20 = lar10.MouseLeave:Connect(function(...)
+    lar10.BackgroundColor3 = Color3.fromRGB(70, 140, 255)
+end)
+local lar21 = lar13.MouseEnter:Connect(function(...)
+    lar13.BackgroundColor3 = Color3.fromRGB(100, 220, 140)
+end)
+local lar22 = lar13.MouseLeave:Connect(function(...)
+    lar13.BackgroundColor3 = Color3.fromRGB(80, 200, 120)
+end)
